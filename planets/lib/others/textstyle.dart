@@ -19,3 +19,7 @@ final regularTextStyle = baseTextStyle.copyWith(
 final subHeaderTextStyle = regularTextStyle.copyWith(
   fontSize: 12.0
 );
+
+final commonTextStyle = regularTextStyle.copyWith(
+  fontSize: 16.0,
+);

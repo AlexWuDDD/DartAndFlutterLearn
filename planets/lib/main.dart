@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:planets/widgets/DetailPage.dart';
 import 'package:planets/widgets/HomePage.dart';
 
 
@@ -14,6 +15,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "Planets",
       home: HomePage(),
+      // routes: <String, WidgetBuilder>{
+      //   '/detail': (_) => DetailPage(),
+      // },
     );
   }
 }
