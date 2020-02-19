@@ -13,6 +13,12 @@ void main(){
   //     MyApp(settings : settings),
   //   ));
   runApp(MyApp());
+  // SystemChrome.setApplicationSwitcherDescription(
+  //       const ApplicationSwitcherDescription(
+  //           label: "Demo Flutter", primaryColor: 0xFFE53935))
+  //   .then((_) {
+  // runApp(new MyApp());
+// });
 }
 
 class MyApp extends StatelessWidget {
@@ -30,7 +36,7 @@ class MyApp extends StatelessWidget {
       accentColor: AppColor.midnightCloud, //小部件的前景色
       //A text theme that contrasts with the primary color.
       primaryTextTheme: Theme.of(context).textTheme.apply(
-        bodyColor: AppColor.textColorDark,
+        bodyColor: AppColor.cloudColorLight,
         displayColor: AppColor.textColorDark,
       ),
       //Text with a color that contrasts with the card and canvas colors.
