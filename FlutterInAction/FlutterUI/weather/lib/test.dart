@@ -35,7 +35,165 @@ class Test extends StatelessWidget {
   Widget build(BuildContext context) {
     //return PaddingDemo();
     //return TabBarDemo(tabItems: list, onTabChange: MyonTapChange, startIndex: 0,);
-    return ListViewDemo();
+    //return GestureDemo2();
+    return FormsDemo();
+  }
+}
+
+class FormsDemo extends StatefulWidget {
+  FormsDemo({Key key}) : super(key: key);
+
+  @override
+  _FormsDemoState createState() => _FormsDemoState();
+}
+
+class _FormsDemoState extends State<FormsDemo> {
+
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Add City'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(10),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.all(10),
+                child: TextFormField(
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    helperText: "Required",
+                    labelText: "City name",
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(10),
+                child: TextFormField(
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    helperText: "Optional",
+                    labelText: "State or Territory name",
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(10),
+                child: DropdownButtonFormField(
+                  items: <DropdownMenuItem>[], 
+                  onChanged: (value) {},
+                ),
+              ),
+              FormField(
+                builder: (context){
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text("Default city?"),
+                      Checkbox(
+                        value: false, 
+                        onChanged: (val){}
+                      )
+                    ],
+                  );
+                },
+              ),
+              Divider(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                    child: FlatButton(
+                      textColor: Colors.red[400],
+                      onPressed: (){}, 
+                      child: Text('Cancel')
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(8),
+                    child: RaisedButton(
+                      textColor: Colors.red[400],
+                      onPressed: (){}, 
+                      child: Text('Submit')
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+
+    );
+  }
+}
+
+
+class GestureDemo extends StatelessWidget {
+  const GestureDemo({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child:GestureDetector(
+        child: Text("Tap me"),
+        onTap: ()=>print("Tap me"),
+      ),
+    );
+  }
+}
+
+class GestureDemo2 extends StatefulWidget {
+  GestureDemo2({Key key}) : super(key: key);
+
+  @override
+  _GestureDemo2State createState() => _GestureDemo2State();
+}
+
+class _GestureDemo2State extends State<GestureDemo2> {
+
+  String shownText = "Alex";
+  double fontsize = 20;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Gesture Demo"),
+      ),
+      body: Center(
+        child: GestureDetector(
+        child: Text(
+            shownText,
+            style: TextStyle(
+              fontSize: fontsize,
+            ),
+          ),
+          onDoubleTap: (){
+            setState(() {
+              this.shownText = this.shownText == "Alex" ? "Amy" : "Alex";
+            });
+          },
+          onVerticalDragUpdate: (DragUpdateDetails v){
+            var screenHeight = MediaQuery.of(context).size.height;
+            var dragEnd = v.globalPosition.dy;
+            var percentage = (dragEnd/screenHeight)*100;
+            print(percentage);
+            if(percentage > 20){
+              setState(() {
+                fontsize = percentage;
+              });
+            }
+          },
+        ),
+      ),
+    );
   }
 }
 
@@ -63,14 +221,29 @@ class _ListViewDemoState extends State<ListViewDemo> {
                 itemCount: allAddedCities.length,
                 itemBuilder: (BuildContext context, int index){
                   final city = allAddedCities[index];
-                  return CheckboxListTile(
-                    title: Text(city.name), 
-                    onChanged: (bool value) {
-                      setState(() {
-                        city.checked = value;
-                      });
-                    }, 
-                    value: city.checked,
+                  return Dismissible(
+                    key: ValueKey(city),
+                    onDismissed: (DismissDirection dir){
+                      if(dir == DismissDirection.endToStart){
+                        allAddedCities.removeWhere((target) => city == target);
+                      }
+                    },
+                    confirmDismiss: (DismissDirection dir) async{
+                      return dir == DismissDirection.endToStart;
+                    },
+                    background: Container(
+                      child: Icon(Icons.delete_forever),
+                      decoration: BoxDecoration(color: Colors.red[700]),
+                    ),
+                    child: CheckboxListTile(
+                      title: Text(city.name), 
+                      onChanged: (bool value) {
+                        setState(() {
+                          city.checked = value;
+                        });
+                      }, 
+                      value: city.checked,
+                    ),
                   );
                 }
               ),
