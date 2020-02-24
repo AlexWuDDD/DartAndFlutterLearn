@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:weather/country.dart';
+import 'package:weather/drop_down_field_expand.dart';
 
 List<String> list = ['tab1', 'tab2', 'tab3', 'tab4', 'tab5'];
 
@@ -9,22 +11,33 @@ Function MyonTapChange(int index){
 class City{
   String name;
   bool checked;
+  int listIndex;
+  Country country;
 
-  City(this.name, {this.checked = false});
+  City(this.name, {this.checked = false, this.listIndex});
+
+   // 命名构造函数
+  City.fromUserInput(){
+    if(this.listIndex == null){
+      this.listIndex = allAddedCities.length + 1;
+    }
+  }
 }
 
+
+
 List<City> allAddedCities = [
-  City("Portland"),
-  City("Berlin"), 
-  City("Buenos Aires"), 
-  City("Chaing Mai"), 
-  City("Eugene"), 
-  City("Georgetown"), 
-  City("London"),
-  City("New York"), 
-  City("Panama City"), 
-  City("San Francisco"), 
-  City("Tokyo"), 
+  City("Portland", listIndex: 0),
+  City("Berlin", listIndex: 1), 
+  City("Buenos Aires", listIndex: 2), 
+  City("Chaing Mai", listIndex: 3), 
+  City("Eugene", listIndex: 4), 
+  City("Georgetown", listIndex: 5), 
+  City("London", listIndex: 6),
+  City("New York", listIndex: 7), 
+  City("Panama City", listIndex: 8), 
+  City("San Francisco", listIndex: 9), 
+  City("Tokyo", listIndex: 10), 
 ];
 
 
@@ -50,6 +63,10 @@ class FormsDemo extends StatefulWidget {
 class _FormsDemoState extends State<FormsDemo> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  
+  City _newCity = City.fromUserInput();
+  bool _isDefalutFlag = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,11 +82,18 @@ class _FormsDemoState extends State<FormsDemo> {
               Padding(
                 padding: EdgeInsets.all(10),
                 child: TextFormField(
+                  onSaved: (String val)=>_newCity.name = val,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     helperText: "Required",
                     labelText: "City name",
                   ),
+                  autofocus: true,
+                  autovalidate: true,
+                  validator: (String val){
+                    if(val.isEmpty) return "Filed cannot be left blank";
+                    return null;
+                  },
                 ),
               ),
               Padding(
@@ -82,22 +106,29 @@ class _FormsDemoState extends State<FormsDemo> {
                   ),
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.all(10),
-                child: DropdownButtonFormField(
-                  items: <DropdownMenuItem>[], 
-                  onChanged: (value) {},
-                ),
+              CountryDropdownField(
+                country: _newCity.country,
+                onChanged: (newSelection){
+                  setState(() {
+                    _newCity.country = newSelection;
+                  });
+                },
               ),
               FormField(
+                onSaved: (val)=>_newCity.checked = _isDefalutFlag,
+                enabled: true,
                 builder: (context){
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text("Default city?"),
                       Checkbox(
-                        value: false, 
-                        onChanged: (val){}
+                        value: _isDefalutFlag, 
+                        onChanged: (val){
+                          setState(() {
+                            _isDefalutFlag = val;
+                          });
+                        }
                       )
                     ],
                   );
@@ -344,4 +375,34 @@ class PaddingDemo extends StatelessWidget {
     );
     
   }
+}
+
+class CountryDropdownField extends StatelessWidget{
+
+  final Function onChanged;
+  final Country country;
+
+  CountryDropdownField({this.onChanged, this.country});
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: DropDownExpanded<Country>(
+        isExpanded: true,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          labelText: "Country",
+        ),
+        value: country??Country.AD,
+        onChanged: (Country newSelection)=>onChanged(newSelection),
+        items: Country.ALL.map((Country country){
+          return DropdownMenuItem(child: Text(country.name), value: country,);
+        }).toList()
+
+      ),
+    );
+  }
+  
 }
