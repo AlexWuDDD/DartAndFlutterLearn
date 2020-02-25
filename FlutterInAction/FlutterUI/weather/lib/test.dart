@@ -14,7 +14,7 @@ class City{
   int listIndex;
   Country country;
 
-  City(this.name, {this.checked = false, this.listIndex});
+  City(this.name, {this.checked = false, this.listIndex, this.country});
 
    // 命名构造函数
   City.fromUserInput(){
@@ -47,9 +47,9 @@ class Test extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //return PaddingDemo();
-    //return TabBarDemo(tabItems: list, onTabChange: MyonTapChange, startIndex: 0,);
+    return TabBarDemo(tabItems: list, onTabChange: MyonTapChange, startIndex: 0,);
     //return GestureDemo2();
-    return FormsDemo();
+    //return FormsDemo();
   }
 }
 
@@ -66,17 +66,77 @@ class _FormsDemoState extends State<FormsDemo> {
   
   City _newCity = City.fromUserInput();
   bool _isDefalutFlag = false;
+  FocusNode focusNode;
+  bool _formChanged = false;
+
+  @override
+  void initState() { 
+    super.initState();
+    focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    focusNode.dispose();
+    super.dispose();
+  }
+
+  void _onFormChange(){
+    if(_formChanged) return;
+    setState(() {
+      _formChanged = true;
+    });
+  }
+
+  void _handleAddNewCity() {
+    final city = City(
+      _newCity.name,
+      country: _newCity.country,
+      checked: true,
+    );
+
+    allAddedCities.add(city);
+  }
+
+  Future<bool> _onWillPop() {
+    if (!_formChanged) return Future<bool>.value(true);
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+              content: Text("Are you sure you want to abandon the form? Any changes will be lost."),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("Cancel"),
+                  onPressed: () => Navigator.of(context).pop(false),
+                  textColor: Colors.black,
+                ),
+                FlatButton(
+                  child: Text("Abandon"),
+                  textColor: Colors.red,
+                  onPressed: () => Navigator.pop(context, true),
+                ),
+              ],
+            ) ??
+            false;
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Add City'),
+        leading: Icon(Icons.keyboard_arrow_left),
       ),
       body: Padding(
         padding: EdgeInsets.all(10),
         child: Form(
           key: _formKey,
+          onChanged: _onFormChange,
+          onWillPop: _onWillPop, //Called when the user is going to leave the page.
           child: ListView(
             children: <Widget>[
               Padding(
@@ -89,7 +149,7 @@ class _FormsDemoState extends State<FormsDemo> {
                     labelText: "City name",
                   ),
                   autofocus: true,
-                  autovalidate: true,
+                  autovalidate: _formChanged,
                   validator: (String val){
                     if(val.isEmpty) return "Filed cannot be left blank";
                     return null;
@@ -99,11 +159,19 @@ class _FormsDemoState extends State<FormsDemo> {
               Padding(
                 padding: EdgeInsets.all(10),
                 child: TextFormField(
+                  focusNode: focusNode,
+                  onSaved: (String val)=> print(val),
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     helperText: "Optional",
                     labelText: "State or Territory name",
                   ),
+                  validator: (String val){
+                    if(val.isEmpty){
+                      return "Field cannot be left blank";
+                    }
+                    return null;
+                  },
                 ),
               ),
               CountryDropdownField(
@@ -142,15 +210,30 @@ class _FormsDemoState extends State<FormsDemo> {
                     padding: EdgeInsets.all(8),
                     child: FlatButton(
                       textColor: Colors.red[400],
-                      onPressed: (){}, 
+                      onPressed: ()async{
+                        if(await _onWillPop()){
+                          Navigator.of(context).pop(true);
+                        }
+                      }, 
                       child: Text('Cancel')
                     ),
                   ),
                   Padding(
                     padding: EdgeInsets.all(8),
                     child: RaisedButton(
-                      textColor: Colors.red[400],
-                      onPressed: (){}, 
+                      textColor: Colors.blue[400],
+                      onPressed: _formChanged
+                        ?(){
+                          if(_formKey.currentState.validate()){
+                            _formKey.currentState.save();
+                            _handleAddNewCity();
+                            Navigator.pop(context);
+                          }
+                          else{
+                            FocusScope.of(context).requestFocus(focusNode);
+                          }
+                        }
+                        :null, 
                       child: Text('Submit')
                     ),
                   ),

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 //import 'package:weather/page/page_container.dart';
 import 'package:weather/styles.dart';
 import 'package:weather/test.dart';
+import 'package:weather/test2.dart';
 
 void main(){
   //AppSettings settings = AppSettings();
@@ -46,12 +47,14 @@ class MyApp extends StatelessWidget {
       ),
     );
 
-    return MaterialApp(
-      title: 'Weather App',
-      debugShowCheckedModeBanner: false,
-      theme: theme,
-      //home: PageContainer(settings:settings),
-      home: Test(),
-    );
+    return PhysicalAnimationDemo();
+
+    // return MaterialApp(
+    //   title: 'Weather App',
+    //   debugShowCheckedModeBanner: false,
+    //   theme: theme,
+    //   //home: PageContainer(settings:settings),
+    //   home: Test2(),
+    // );
   }
 }
